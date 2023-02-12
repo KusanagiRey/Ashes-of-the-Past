@@ -1,2 +1,2 @@
-# Ashes-of-the-Past
-Сreating a 2D platformer on the Unity engine. This project is my final qualification work.
+# Ashes of the Past
+Разработка 2D-платформера на движке Unity для персональных компьютеров. Этот проект является моей дипломной работой.
