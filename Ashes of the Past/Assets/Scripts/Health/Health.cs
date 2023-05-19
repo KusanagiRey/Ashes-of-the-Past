@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Health : MonoBehaviour
 {
-    [SerializeField] private float startingHealth = 20;
+    [SerializeField] private float startingHealth;
     public float currentHealth { get; private set; }
 
     private Animator anim;
@@ -14,6 +14,7 @@ public class Health : MonoBehaviour
 
     private void Awake() 
     {
+        startingHealth = GetComponent<CharacterStats>().health;
         currentHealth = startingHealth;
         healthBar.SetMaxHealth(startingHealth);
         anim = GetComponent<Animator>();
@@ -35,7 +36,11 @@ public class Health : MonoBehaviour
                 anim.SetTrigger("isDead");
                 GetComponent<CharacterMovement>().enabled = false;
                 GetComponent<Rigidbody2D>().velocity = new Vector2(0, 0);
+                StaminaBar.instance.currentStamina = StaminaBar.instance.maxStamina;
+                StaminaBar.instance.staminaBar.value = 0;
                 dead = true;
+                DataPersistenceManager.instance.OnPlayerDeath();
+                DeathScreen.instance.DeathScreenOn();
             }
             
         }

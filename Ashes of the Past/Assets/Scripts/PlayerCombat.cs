@@ -25,8 +25,9 @@ public class PlayerCombat : MonoBehaviour
 
     void Attack()
     {
-        if (Input.GetKeyDown(KeyCode.Mouse0) && !_isAttacking)
+        if (Input.GetKeyDown(KeyCode.Mouse0) && !_isAttacking && StaminaBar.instance.currentStamina != 0)
         {
+            StaminaBar.instance.UseStamina(5);
             _isAttacking = true;
         }
     }
