@@ -15,7 +15,7 @@ public class CharacterMovement : MonoBehaviour
     private bool _jumpLock = false;
 
     [SerializeField] private float _rollDistance;
-    private bool _isRolling;
+    public bool _isRolling;
     private float _doubleTapTime;
     KeyCode lastKeyCode;
  
@@ -40,14 +40,19 @@ public class CharacterMovement : MonoBehaviour
     private void Update()
     {
         //Moving
-        _moveVector.x = Input.GetAxisRaw("Horizontal");   
-        _rigidbody.velocity = new Vector2(_moveVector.x * _speed, _rigidbody.velocity.y);
-        _animator.SetFloat("moveX", Mathf.Abs(_moveVector.x));
-
+        if(_isRolling == false)
+        {
+            _moveVector.x = Input.GetAxisRaw("Horizontal");   
+            _rigidbody.velocity = new Vector2(_moveVector.x * _speed, _rigidbody.velocity.y);
+            _animator.SetFloat("moveX", Mathf.Abs(_moveVector.x));
+        }
+        
+        Vector3 rotation = transform.eulerAngles;
         if (_moveVector.x != 0)
         {
-            _sprRendered.flipX = _moveVector.x > 0 ? false : true;         
+            rotation.y = _moveVector.x > 0 ? 0f : 180f;
         }
+        transform.eulerAngles = rotation;
 
         //Croaching
         if (Input.GetKey(KeyCode.LeftControl) && _isGrounded)
@@ -68,16 +73,18 @@ public class CharacterMovement : MonoBehaviour
         }
 
         //Jumping
-        if (Input.GetKeyDown(KeyCode.Space) && _isGrounded && !_isRolling && !_jumpLock)
+        if (Input.GetKeyDown(KeyCode.Space) && _isGrounded && !_isRolling && !_jumpLock && StaminaBar.instance.currentStamina != 0)
         {
+            StaminaBar.instance.UseStamina(5);
             Jump();
         }
 
         //Rolling Left
-        if (Input.GetKeyDown(KeyCode.A) && _isGrounded)
+        if (Input.GetKeyDown(KeyCode.A) && _isGrounded && StaminaBar.instance.currentStamina != 0)
         {
             if (_doubleTapTime > Time.time && lastKeyCode == KeyCode.A)
             {
+                StaminaBar.instance.UseStamina(5);
                 StartCoroutine(Roll(-1f));
             }
             else
@@ -88,10 +95,11 @@ public class CharacterMovement : MonoBehaviour
         }
 
         //Rolling Right
-        if (Input.GetKeyDown(KeyCode.D) && _isGrounded)
+        if (Input.GetKeyDown(KeyCode.D) && _isGrounded && StaminaBar.instance.currentStamina != 0)
         {
             if (_doubleTapTime > Time.time && lastKeyCode == KeyCode.D)
             {
+                StaminaBar.instance.UseStamina(5);
                 StartCoroutine(Roll(1f));
             }
             else
@@ -116,12 +124,20 @@ public class CharacterMovement : MonoBehaviour
         _animator.SetBool("onGround", _isGrounded);
     }
 
-    IEnumerator Roll (float direction)
+    IEnumerator Roll(float direction)
     {
         _isRolling = true;
         _animator.SetTrigger("Roll");
         _rigidbody.AddForce(new Vector2(_rollDistance * direction, _rigidbody.velocity.y), ForceMode2D.Impulse);
         yield return new WaitForSeconds(0.6f);
         _isRolling = false;
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision) 
+    {
+        if (collision.gameObject.tag == "Enemy")
+        {
+            Physics2D.IgnoreCollision(collision.collider, GetComponent<Collider2D>());
+        }
     }
 }

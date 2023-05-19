@@ -10,7 +10,11 @@ public class TestDamage : MonoBehaviour
     {
         if(collision.tag == "Player")
         {
-            collision.GetComponent<Health>().TakeDamage(damage);
+            if(collision.GetComponent<CharacterMovement>()._isRolling == false)
+            {
+                collision.GetComponent<Health>().TakeDamage(damage);
+                collision.GetComponent<TimeStop>().StopTime(0.05f, 10, 0.1f);
+            }
         }
     }
 }
